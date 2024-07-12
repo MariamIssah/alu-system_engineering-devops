@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
 # This script creates an RSA key pair with a 4096-bit key and a passphrase
 
+# Generate the RSA key pair
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/school -N "betty"
+
+# Verify the key properties
+key_info=$(ssh-keygen -l -f ~/.ssh/school)
+
+if [[ $key_info == *"4096"* && $key_info == *"RSA"* ]]; then
+  echo "The school file is an RSA private key with 4096 bits."
+else
+  echo "The school file is not as expected."
+fi
+
+# Verify the existence of the school file
+if [ -f ~/.ssh/school ]; then
+  echo "The school file exists after script execution."
+else
+  echo "The school file does not exist."
+fi
