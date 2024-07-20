@@ -1,27 +1,28 @@
-#!/usr/bin/env bash
-# Installs, configures, and starts the server
-apt-get update
-apt-get -y install nginx
-ufw allow 'Nginx HTTP'
-mkdir -p /var/www/html
-chmod -R 755 /var/www
-echo 'Hello World!' > /var/www/html/index.html
-SERVER_CONFIG=\
-"server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
-	root /var/www/html;
-	index index.html index.htm index.nginx-debian.html;
-	server_name _;
-	location / {
-		try_files \$uri \$uri/ =404;
-	}
-}"
+#!/bin/bash
 
-bash -c "echo -e '$SERVER_CONFIG' > /etc/nginx/sites-enabled/default"
-
-if [ "$(pgrep -c nginx)" -le 0 ]; then
-	service nginx start
-else
-	service nginx restart
+# Check if the script is run as root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
 fi
+
+# Update package list and install Nginx
+apt-get update -y
+apt-get install nginx -y
+
+# Create an index.html file with the required content
+echo "Holberton School" > /var/www/html/index.html
+
+# Restart Nginx to apply changes without using systemctl
+service nginx restart || /etc/init.d/nginx restart
+
+# Verify Nginx installation and content
+if curl -s http://localhost/ | grep -q "Holberton School"; then
+  echo "Nginx is installed and serving the expected content."
+else
+  echo "Nginx installation or configuration failed."
+  exit 1
+fi
+
+# Output to verify completion
+echo "Nginx installation and configuration complete."
