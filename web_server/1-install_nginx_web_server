@@ -1,28 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# bash script to install nginx web server & make the following configurations:
 
-# Check if the script is run as root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Please run as root"
-  exit 1
-fi
+sudo apt-get update
+sudo apt-get -y install nginx
 
-# Update package list and install Nginx
-apt-get update -y
-apt-get install nginx -y
+# Create a custom HTML page with the content "Holberton School"
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# Create an index.html file with the required content
-echo "Holberton School" > /var/www/html/index.html
+# Configure Nginx to listen on port 80
+sudo sed -i 's/80 default_server/80 default_server ipv6only=on/' /etc/nginx/sites-available/default
 
-# Restart Nginx to apply changes without using systemctl
-service nginx restart || /etc/init.d/nginx restart
+# Restart Nginx using service (systemctl not used)
+sudo service nginx restart
 
-# Verify Nginx installation and content
-if curl -s http://localhost/ | grep -q "Holberton School"; then
-  echo "Nginx is installed and serving the expected content."
-else
-  echo "Nginx installation or configuration failed."
-  exit 1
-fi
+# Wait for Nginx to restart (add a delay of 2 seconds)
+sleep 2
 
-# Output to verify completion
-echo "Nginx installation and configuration complete."
+# Check if Nginx returns the expected content
+curl -s http://localhost | grep "Holberton School"
